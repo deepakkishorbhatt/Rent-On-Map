@@ -241,10 +241,20 @@ export default function PropertySearch() {
         if (newFilters.type) params.set('type', newFilters.type); else params.delete('type');
         if (newFilters.furnishing) params.set('furnishing', newFilters.furnishing); else params.delete('furnishing');
         if (newFilters.tenantPreference) params.set('tenantPreference', newFilters.tenantPreference); else params.delete('tenantPreference');
-        params.set('minPrice', newFilters.minPrice.toString());
-        params.set('maxPrice', newFilters.maxPrice.toString());
 
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        // Only add price params if they differ from defaults
+        if (newFilters.minPrice !== 5000) {
+            params.set('minPrice', newFilters.minPrice.toString());
+        } else {
+            params.delete('minPrice');
+        }
+        if (newFilters.maxPrice !== 100000) {
+            params.set('maxPrice', newFilters.maxPrice.toString());
+        } else {
+            params.delete('maxPrice');
+        }
+
+        const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
         window.history.replaceState({}, '', newUrl);
 
         if (currentBounds) {
@@ -298,39 +308,43 @@ export default function PropertySearch() {
                 <ActionSidebar onPostProperty={() => setIsPostModalOpen(true)} />
 
                 {/* Search Area Controls - Top Center */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-                    {showSearchButton && (
-                        <Button
-                            className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg gap-2 rounded-full px-6 transition-all animate-in fade-in slide-in-from-top-4"
-                            onClick={handleSearchAreaClick}
-                        >
-                            <Search size={16} />
-                            Search this area
-                        </Button>
-                    )}
+                {session && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+                        {showSearchButton && (
+                            <Button
+                                className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg gap-2 rounded-full px-6 transition-all animate-in fade-in slide-in-from-top-4"
+                                onClick={handleSearchAreaClick}
+                            >
+                                <Search size={16} />
+                                Search this area
+                            </Button>
+                        )}
 
-                    <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border flex items-center gap-2">
-                        <Checkbox
-                            id="search-move"
-                            checked={searchAsIMove}
-                            onCheckedChange={(checked) => setSearchAsIMove(checked as boolean)}
-                            className="data-[state=checked]:bg-blue-600"
-                        />
-                        <Label htmlFor="search-move" className="text-xs font-medium cursor-pointer text-gray-700">
-                            Search as I move
-                        </Label>
+                        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border flex items-center gap-2">
+                            <Checkbox
+                                id="search-move"
+                                checked={searchAsIMove}
+                                onCheckedChange={(checked) => setSearchAsIMove(checked as boolean)}
+                                className="data-[state=checked]:bg-blue-600"
+                            />
+                            <Label htmlFor="search-move" className="text-xs font-medium cursor-pointer text-gray-700">
+                                Search as I move
+                            </Label>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Icon Filters - Floating Bottom Center */}
-                <div className="absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
-                        <IconFilterBar onFilterChange={handleFilterChange} />
+                {session && (
+                    <div className="absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
+                            <IconFilterBar onFilterChange={handleFilterChange} />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Results Counter - Bottom Left */}
-                {currentBounds && (
+                {session && currentBounds && (
                     <div className="absolute bottom-40 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[1000]">
                         <div className="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
                             {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
