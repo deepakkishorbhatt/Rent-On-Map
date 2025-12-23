@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
@@ -27,11 +29,22 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         }
     };
 
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle className="text-center text-xl font-bold">Welcome to Rent On Map</DialogTitle>
+                    <DialogTitle className="flex flex-col items-center justify-center gap-3 pb-2">
+                        <div className="relative w-12 h-12">
+                            <Image
+                                src="/rent_on_map_assets/real_rent-on-map-logo.png"
+                                alt="Rent On Map"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                        <span className="text-xl font-bold">Rent On Map</span>
+                    </DialogTitle>
                     <DialogDescription className="text-center">
                         Sign in to save properties and create alerts.
                     </DialogDescription>

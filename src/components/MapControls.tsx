@@ -46,8 +46,8 @@ export function MapControls() {
                 html: `
                     <div class="relative flex items-center justify-center">
                         <img 
-                            src="/rent_on_map_assets/rent_on_map_logo.png" 
-                            alt="Your location" 
+                            src="/rent_on_map_assets/real_rent-on-map-logo.png" 
+                            alt="Your location"  
                             class="w-12 h-12 object-contain select-none pointer-events-none drop-shadow-lg"
                             draggable="false"
                             oncontextmenu="return false;"
@@ -88,7 +88,7 @@ export function MapControls() {
             <Button
                 variant="outline"
                 size="icon"
-                className="bg-white hover:bg-gray-50 shadow-lg w-10 h-10"
+                className="bg-white hover:bg-gray-50 shadow-lg w-12 h-12"
                 onClick={handleZoomIn}
                 title="Zoom in"
             >
@@ -98,7 +98,7 @@ export function MapControls() {
             <Button
                 variant="outline"
                 size="icon"
-                className="bg-white hover:bg-gray-50 shadow-lg w-10 h-10"
+                className="bg-white hover:bg-gray-50 shadow-lg w-12 h-12"
                 onClick={handleZoomOut}
                 title="Zoom out"
             >
@@ -108,7 +108,7 @@ export function MapControls() {
             <Button
                 variant="outline"
                 size="icon"
-                className={`bg-white hover:bg-gray-50 shadow-lg w-10 h-10 ${locating ? 'bg-blue-50' : ''}`}
+                className={`bg-white hover:bg-gray-50 shadow-lg w-12 h-12 ${locating ? 'bg-blue-50' : ''}`}
                 onClick={handleLocate}
                 disabled={locating}
                 title="Show my location"

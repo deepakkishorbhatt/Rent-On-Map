@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Map, PlusCircle, Heart, LogOut, Menu, User, MessageSquare } from 'lucide-react';
 import { ReactNode } from 'react';
 import { LoginModal } from '@/components/LoginModal';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { PostPropertyModal } from '@/components/PostPropertyModal';
@@ -39,7 +39,7 @@ export function Navbar({ centerContent }: NavbarProps) {
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
                         <div className="relative w-8 h-8 flex-shrink-0">
                             <Image
-                                src="/rent_on_map_assets/rent_on_map_logo.png"
+                                src="/rent_on_map_assets/real_rent-on-map-logo.png"
                                 alt="Rent On Map"
                                 fill
                                 className="object-contain select-none pointer-events-none"
@@ -125,21 +125,39 @@ export function Navbar({ centerContent }: NavbarProps) {
 
                 {/* Mobile Menu Trigger */}
                 <div className="md:hidden flex items-center">
-                    <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <Menu size={24} />
+                    <Dialog open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full">
+                                <Avatar className="h-8 w-8 border border-gray-200">
+                                    <AvatarImage
+                                        src={session?.user?.image || ""}
+                                        alt={session?.user?.name || "User"}
+                                        referrerPolicy="no-referrer"
+                                    />
+                                    <AvatarFallback className="bg-blue-100 text-blue-600 font-medium">
+                                        {session?.user?.name ? (
+                                            session.user.name.charAt(0).toUpperCase()
+                                        ) : (
+                                            <User size={18} className="text-gray-600" />
+                                        )}
+                                    </AvatarFallback>
+                                </Avatar>
                             </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right" className="w-[300px] sm:w-[350px]">
-                            <SheetHeader className="mb-6 text-left">
-                                <SheetTitle className="flex items-center gap-2">
-                                    <div className="bg-blue-600 p-1 rounded-md text-white">
-                                        <Map size={16} />
+                        </DialogTrigger>
+                        <DialogContent className="w-[90%] rounded-xl sm:max-w-[400px]">
+                            <DialogHeader className="mb-4">
+                                <DialogTitle className="flex flex-col items-center justify-center gap-3 py-2">
+                                    <div className="relative w-12 h-12 flex-shrink-0">
+                                        <Image
+                                            src="/rent_on_map_assets/real_rent-on-map-logo.png"
+                                            alt="Rent On Map"
+                                            fill
+                                            className="object-contain select-none pointer-events-none"
+                                        />
                                     </div>
-                                    Rent On Map
-                                </SheetTitle>
-                            </SheetHeader>
+                                    <span className="text-xl font-bold">Rent On Map</span>
+                                </DialogTitle>
+                            </DialogHeader>
 
                             <div className="flex flex-col gap-4">
                                 {session ? (
@@ -227,8 +245,8 @@ export function Navbar({ centerContent }: NavbarProps) {
                                     </div>
                                 )}
                             </div>
-                        </SheetContent>
-                    </Sheet>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />

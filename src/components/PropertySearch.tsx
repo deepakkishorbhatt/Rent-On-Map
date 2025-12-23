@@ -298,7 +298,7 @@ export default function PropertySearch() {
                 <ActionSidebar onPostProperty={() => setIsPostModalOpen(true)} />
 
                 {/* Search Area Controls - Top Center */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-2">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
                     {showSearchButton && (
                         <Button
                             className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg gap-2 rounded-full px-6 transition-all animate-in fade-in slide-in-from-top-4"
@@ -323,7 +323,7 @@ export default function PropertySearch() {
                 </div>
 
                 {/* Icon Filters - Floating Bottom Center */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
+                <div className="absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
                     <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
                         <IconFilterBar onFilterChange={handleFilterChange} />
                     </div>
@@ -331,7 +331,7 @@ export default function PropertySearch() {
 
                 {/* Results Counter - Bottom Left */}
                 {currentBounds && (
-                    <div className="absolute bottom-6 left-6 z-[1000]">
+                    <div className="absolute bottom-40 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[1000]">
                         <div className="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
                             {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
                         </div>

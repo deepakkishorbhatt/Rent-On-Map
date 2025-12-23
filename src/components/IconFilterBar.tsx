@@ -15,7 +15,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
-import { Home, DollarSign, Sofa, Users, X } from 'lucide-react';
+import { Building, DollarSign, Sofa, Users, X } from 'lucide-react';
 
 export interface FilterState {
     type: string;
@@ -102,7 +102,7 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                         className={`h-12 w-12 rounded-full bg-white shadow-md hover:shadow-lg transition-all ${type !== 'all' ? 'bg-blue-50 border-blue-400 text-blue-700' : ''}`}
                         title="Property Type"
                     >
-                        <Home size={20} />
+                        <Building size={20} />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2 z-[2000]" align="center" sideOffset={12}>
