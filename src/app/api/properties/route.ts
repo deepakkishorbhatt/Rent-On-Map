@@ -18,14 +18,17 @@ export async function GET(request: Request) {
             // If no bounds provided, return all properties (or limited set) - for now return empty or simple limit
             // Let's return all for MVP or limit to 100 recent
             await dbConnect();
-            const properties = await Property.find().limit(100);
+            const properties = await Property.find().limit(100).populate('ownerId', 'name email isVerified image');
             return NextResponse.json({ properties });
         }
 
         await dbConnect();
 
         // Mongo uses [lng, lat]
-        const properties = await Property.find({
+        // Debug logging
+        console.log('Search Params:', Object.fromEntries(searchParams.entries()));
+
+        const query: any = {
             location: {
                 $geoWithin: {
                     $box: [
@@ -34,16 +37,36 @@ export async function GET(request: Request) {
                     ],
                 },
             },
-            // Filters
-            ...(searchParams.get('type') ? { type: searchParams.get('type') } : {}),
-            ...(searchParams.get('furnishing') ? { features: searchParams.get('furnishing') === 'Full' ? 'Fully Furnished' : searchParams.get('furnishing') === 'Semi' ? 'Semi Furnished' : 'Unfurnished' } : {}), // Simplified mapping for MVP
-            // For Tenant Preference, assuming it's in features array
-            ...(searchParams.get('tenantPreference') ? { features: searchParams.get('tenantPreference') } : {}),
             price: {
                 $gte: parseFloat(searchParams.get('minPrice') || '0'),
                 $lte: parseFloat(searchParams.get('maxPrice') || '10000000')
-            },
-        });
+            }
+        };
+
+        if (searchParams.get('type')) {
+            query.type = searchParams.get('type');
+        }
+
+        // Handle features (furnishing and tenant preference)
+        const features = [];
+        if (searchParams.get('furnishing')) {
+            const f = searchParams.get('furnishing');
+            if (f === 'Full') features.push('Fully Furnished');
+            else if (f === 'Semi') features.push('Semi Furnished');
+            else if (f === 'None') features.push('Unfurnished');
+        }
+        if (searchParams.get('tenantPreference')) {
+            const t = searchParams.get('tenantPreference');
+            if (t && t !== 'Any') features.push(t);
+        }
+
+        if (features.length > 0) {
+            query.features = { $all: features };
+        }
+
+        console.log('Mongo Query:', JSON.stringify(query, null, 2));
+
+        const properties = await Property.find(query).populate('ownerId', 'name email isVerified image');
 
         return NextResponse.json({ properties });
     } catch (error: any) {
@@ -97,6 +120,10 @@ export async function POST(request: Request) {
             images: uploadedImages,
             ownerId: user._id,
             features: features || [],
+            bedrooms: body.bedrooms,
+            bathrooms: body.bathrooms,
+            area: body.area,
+            contactNumber: body.contactNumber,
             location: {
                 type: 'Point',
                 coordinates: [lng, lat] // GeoJSON is [lng, lat]
@@ -105,8 +132,13 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ property: newProperty }, { status: 201 });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating property:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        return NextResponse.json({
+            error: error.message || 'Internal Server Error',
+            details: error.toString()
+        }, { status: 500 });
     }
 }

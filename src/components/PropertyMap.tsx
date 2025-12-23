@@ -5,17 +5,28 @@ import L from 'leaflet';
 import { useEffect, useState, useMemo } from 'react';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons
-const DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
+// Create custom icon using the logo
+const CustomLocationIcon = L.divIcon({
+    className: 'custom-property-location-icon',
+    html: `
+        <div class="relative flex items-center justify-center">
+            <img 
+                src="/rent_on_map_assets/rent_on_map_logo.png" 
+                alt="Property location" 
+                class="w-12 h-12 object-contain select-none pointer-events-none"
+                draggable="false"
+                oncontextmenu="return false;"
+                style="user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"
+            />
+        </div>
+    `,
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -48],
 });
-L.Marker.prototype.options.icon = DefaultIcon;
+
+// Set as default for this map
+L.Marker.prototype.options.icon = CustomLocationIcon;
 
 interface PropertyMapProps {
     lat: number;

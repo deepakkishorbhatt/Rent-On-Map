@@ -19,7 +19,16 @@ if (!cached) {
 
 async function dbConnect() {
   if (cached.conn) {
-    return cached.conn;
+    // If connected, return instance
+    if (cached.conn.connection.readyState === 1) {
+      return cached.conn;
+    }
+    // If not connected (and not connecting), assume stale and clear cache to retry
+    // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    if (cached.conn.connection.readyState !== 2) {
+      cached.conn = null;
+      cached.promise = null;
+    }
   }
 
   if (!cached.promise) {
@@ -31,7 +40,7 @@ async function dbConnect() {
       return mongoose;
     });
   }
-  
+
   try {
     cached.conn = await cached.promise;
   } catch (e) {

@@ -40,8 +40,28 @@ export function MapControls() {
                 userMarkerRef.current.remove();
             }
 
-            // Add new marker without accuracy circle
-            const newMarker = L.marker(e.latlng)
+            // Create custom icon using just the logo
+            const customIcon = L.divIcon({
+                className: 'custom-user-location-icon',
+                html: `
+                    <div class="relative flex items-center justify-center">
+                        <img 
+                            src="/rent_on_map_assets/rent_on_map_logo.png" 
+                            alt="Your location" 
+                            class="w-12 h-12 object-contain select-none pointer-events-none drop-shadow-lg"
+                            draggable="false"
+                            oncontextmenu="return false;"
+                            style="user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));"
+                        />
+                    </div>
+                `,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24],
+                popupAnchor: [0, -24],
+            });
+
+            // Add new marker with custom icon
+            const newMarker = L.marker(e.latlng, { icon: customIcon })
                 .addTo(map)
                 .bindPopup("You are here")
                 .openPopup();

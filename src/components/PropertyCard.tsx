@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { MapPin, Home, IndianRupee, Heart } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface PropertyCardProps {
     property: {
@@ -19,13 +20,22 @@ export interface PropertyCardProps {
         location: {
             coordinates: [number, number];
         };
+        isFeatured?: boolean;
     };
     onClick?: () => void;
     isSaved?: boolean;
     onToggleSave?: (id: string) => void;
+    isOwner?: boolean;
+    onEdit?: (property: any) => void;
+    onDelete?: (id: string) => void;
+    onPromote?: (property: any) => void;
+
+    // Selection support
+    selected?: boolean;
+    onSelect?: () => void;
 }
 
-export function PropertyCard({ property, onClick, isSaved, onToggleSave }: PropertyCardProps) {
+export function PropertyCard({ property, onClick, isSaved, onToggleSave, isOwner, onEdit, onDelete, onPromote, selected, onSelect }: PropertyCardProps) {
     // Format price to Indian formatting (e.g., 25,000)
     const formattedPrice = new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -37,7 +47,12 @@ export function PropertyCard({ property, onClick, isSaved, onToggleSave }: Prope
     const features = property.features || ['Family Only', 'Fully Furnished'];
 
     return (
-        <Card className="overflow-hidden group hover:shadow-lg transition-shadow duration-300 w-full cursor-pointer" onClick={onClick}>
+        <Card
+            className={`overflow-hidden group hover:shadow-lg transition-all duration-300 w-full cursor-pointer
+                ${selected ? 'ring-2 ring-blue-600' : ''}
+                ${property.isFeatured ? 'border-2 border-yellow-400 shadow-md ring-1 ring-yellow-400/50' : ''}`}
+            onClick={onClick}
+        >
             <CardHeader className="p-0 relative">
                 <Carousel className="w-full">
                     <CarouselContent>
@@ -69,57 +84,121 @@ export function PropertyCard({ property, onClick, isSaved, onToggleSave }: Prope
                     )}
                 </Carousel>
 
-                <div className="absolute top-2 left-2 flex flex-wrap gap-1 z-10">
-                    <Badge variant="secondary" className="bg-white/90 text-black backdrop-blur-sm shadow-sm hover:bg-white">
-                        {property.type}
-                    </Badge>
+                {/* Badges Container - Top Left */}
+                <div className="absolute top-2 left-2 flex flex-col gap-2 z-10 items-start">
+                    {!isOwner && onSelect && (
+                        <div onClick={(e) => e.stopPropagation()} className="mb-1">
+                            <Checkbox
+                                checked={selected}
+                                onCheckedChange={(c) => onSelect()}
+                                className="h-5 w-5 bg-white/90 border-gray-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 shadow-sm"
+                            />
+                        </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                        {property.isFeatured && (
+                            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-none shadow-sm flex items-center gap-1">
+                                <span className="text-xs">✨ Featured</span>
+                            </Badge>
+                        )}
+
+                        {!isOwner ? (
+                            <Badge variant="secondary" className="bg-white/90 text-black backdrop-blur-sm shadow-sm hover:bg-white">
+                                {property.type}
+                            </Badge>
+                        ) : (
+                            <Badge variant="secondary" className="bg-blue-600 text-white backdrop-blur-sm shadow-sm">
+                                Your Listing
+                            </Badge>
+                        )}
+                    </div>
                 </div>
 
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 z-10 bg-white/50 hover:bg-white/80 backdrop-blur-sm rounded-full h-8 w-8"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleSave?.(property._id);
-                    }}
-                >
-                    <Heart
-                        size={18}
-                        className={isSaved ? "fill-red-500 text-red-500" : "text-gray-700"}
-                    />
-                </Button>
+                {!isOwner && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 z-10 bg-white/50 hover:bg-white/80 backdrop-blur-sm rounded-full h-8 w-8"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleSave?.(property._id);
+                        }}
+                    >
+                        <Heart className={isSaved ? "fill-red-500 text-red-500" : "text-gray-700"} size={18} />
+                    </Button>
+                )}
             </CardHeader>
-
             <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg leading-tight line-clamp-1">{property.title}</h3>
+                    <h3 className="font-semibold text-lg line-clamp-1 flex-1 mr-2" title={property.title}>
+                        {property.title}
+                    </h3>
+                    <div className="text-blue-600 font-bold whitespace-nowrap">
+                        {formattedPrice}
+                    </div>
                 </div>
 
                 <div className="flex items-center text-gray-500 text-sm mb-3">
                     <MapPin size={14} className="mr-1" />
-                    <span className="truncate">Near City Center, Dehradun</span> {/* Placeholder for Geocoded address */}
+                    <span className="truncate">
+                        {/* We don't have exact address, so showing placeholder or lat/lng name */}
+                        Near Coordinate {property.location.coordinates[1].toFixed(2)}, {property.location.coordinates[0].toFixed(2)}
+                    </span>
                 </div>
 
-                <div className="flex gap-2 mb-3 overflow-hidden">
-                    {features.map((feature, index) => (
-                        <Badge key={index} variant="outline" className="text-xs text-gray-600 font-normal shrink-0">
+                <div className="flex flex-wrap gap-2">
+                    {features.slice(0, 3).map((feature: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs bg-gray-50">
                             {feature}
                         </Badge>
                     ))}
-                </div>
-
-                <div className="flex items-end justify-between mt-2">
-                    <div className="flex items-center text-primary font-bold text-xl">
-                        {formattedPrice}
-                        <span className="text-gray-500 text-sm font-normal ml-1">/mo</span>
-                    </div>
+                    {features.length > 3 && (
+                        <Badge variant="outline" className="text-xs bg-gray-50">
+                            +{features.length - 3} more
+                        </Badge>
+                    )}
                 </div>
             </CardContent>
+            {isOwner && (
+                <CardFooter className="p-4 pt-0 grid grid-cols-2 gap-2">
+                    {!property.isFeatured && (
+                        <Button
+                            className="col-span-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 border-0"
+                            size="sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onPromote?.(property);
+                            }}
+                        >
+                            Promote Property
+                        </Button>
+                    )}
 
-            <CardFooter className="p-4 pt-0">
-                <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white">View Details</Button>
-            </CardFooter>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className={property.isFeatured ? "col-span-1" : "col-span-1"}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit?.(property);
+                        }}
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        className={property.isFeatured ? "col-span-1" : "col-span-1"}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(property._id);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </CardFooter>
+            )}
         </Card>
     );
 }

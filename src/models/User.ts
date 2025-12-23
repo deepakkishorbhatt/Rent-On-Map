@@ -5,6 +5,8 @@ export interface IUser extends Document {
     email: string;
     password?: string;
     image?: string;
+    isVerified?: boolean;
+    verificationStatus?: 'unverified' | 'pending' | 'verified';
     savedProperties: mongoose.Types.ObjectId[];
 }
 
@@ -14,6 +16,12 @@ const UserSchema = new Schema<IUser>(
         email: { type: String, required: true, unique: true },
         password: { type: String },
         image: { type: String },
+        isVerified: { type: Boolean, default: false },
+        verificationStatus: {
+            type: String,
+            enum: ['unverified', 'pending', 'verified'],
+            default: 'unverified'
+        },
         savedProperties: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
     },
     { timestamps: true }

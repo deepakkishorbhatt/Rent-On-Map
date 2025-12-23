@@ -160,3 +160,126 @@
   outline: none !important;
   box-shadow: none !important;
 }
+
+/* Fix for popup flickering/black outlining due to global styles */
+.leaflet-popup,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip,
+.leaflet-popup *,
+.leaflet-popup *:focus,
+.leaflet-popup *:focus-visible,
+.leaflet-popup-close-button {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  /* Ensure no background flicker on generic elements */
+}
+
+/* Restore backgrounds for specific elements that need it */
+.leaflet-popup-content-wrapper {
+  background: white !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #666 !important;
+  /* Make sure close button is visible */
+}
+
+/* Global Image Protection - Prevent copying, dragging, and downloading */
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  pointer-events: auto;
+  /* Allow clicks but prevent drag */
+}
+
+/* Custom Cluster Icon Styles */
+.custom-cluster-icon {
+  background: transparent;
+}
+
+.cluster-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: 3px solid white;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glassy ring effect */
+.cluster-marker::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.3);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.custom-cluster-icon:hover .cluster-marker {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.4), 0 10px 10px -5px rgba(37, 99, 235, 0.2);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.custom-cluster-icon:hover .cluster-marker::before {
+  inset: -6px;
+  background: rgba(59, 130, 246, 0.4);
+}
+
+/* Active/Click effect */
+.custom-cluster-icon:active .cluster-marker {
+  transform: scale(0.95);
+}
+
+/* Pulse animation for very dense clusters */
+@keyframes cluster-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+  }
+
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+.cluster-pulse .cluster-marker {
+  animation: cluster-pulse 2s infinite;
+}
+
+/* Prevent right-click context menu on images */
+img {
+  -webkit-touch-callout: none;
+}
+
+/* Additional protection for logo specifically */
+img[src*="rent_on_map_logo"] {
+  pointer-events: none;
+  user-select: none;
+}

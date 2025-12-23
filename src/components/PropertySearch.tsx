@@ -5,13 +5,17 @@ import dynamic from 'next/dynamic';
 import { useSession } from 'next-auth/react';
 import { Navbar } from '@/components/Navbar';
 import { PropertyDetails } from '@/components/PropertyDetails';
-import { FilterBar, FilterState } from '@/components/FilterBar';
+import { IconFilterBar, FilterState } from '@/components/IconFilterBar';
 import { LocationSearch } from '@/components/LocationSearch';
 import { LoginModal } from '@/components/LoginModal';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Search, Move } from 'lucide-react';
+import { ActionSidebar } from '@/components/ActionSidebar';
+import { PostPropertyModal } from '@/components/PostPropertyModal';
+import { PromoteModal } from '@/components/PromoteModal';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Dynamic import for Map
 const MapListing = dynamic(() => import('@/components/MapListing'), {
@@ -28,6 +32,7 @@ interface Property {
     images: string[];
     features?: string[];
     ownerId: string;
+    isFeatured?: boolean;
     location: {
         coordinates: [number, number];
     };
@@ -35,17 +40,27 @@ interface Property {
 
 export default function PropertySearch() {
     const { data: session } = useSession();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const abortControllerRef = useRef<AbortController | null>(null);
+
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(false);
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+
+    // Promote Modal State
+    const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
+    const [propertyToPromote, setPropertyToPromote] = useState<Property | null>(null);
+
+    // Initialize filters from URL params
     const [filters, setFilters] = useState<FilterState>({
-        type: '',
-        minPrice: 5000,
-        maxPrice: 100000,
-        furnishing: '',
-        tenantPreference: '',
+        type: searchParams?.get('type') || '',
+        minPrice: Number(searchParams?.get('minPrice')) || 5000,
+        maxPrice: Number(searchParams?.get('maxPrice')) || 100000,
+        furnishing: searchParams?.get('furnishing') || '',
+        tenantPreference: searchParams?.get('tenantPreference') || '',
     });
     const [currentBounds, setCurrentBounds] = useState<{ minLat: number; maxLat: number; minLng: number; maxLng: number } | null>(null);
 
@@ -56,6 +71,9 @@ export default function PropertySearch() {
     // Search as I Move State
     const [searchAsIMove, setSearchAsIMove] = useState(true);
     const [showSearchButton, setShowSearchButton] = useState(false);
+
+    // Post Property Modal State
+    const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
     // Fetch saved properties on session change
     useEffect(() => {
@@ -109,6 +127,14 @@ export default function PropertySearch() {
 
 
     const fetchProperties = useCallback(async (bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }, currentFilters = filters) => {
+        // Cancel previous request if exists
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         setLoading(true);
         try {
             const params = new URLSearchParams({
@@ -122,33 +148,76 @@ export default function PropertySearch() {
                 ...(currentFilters.furnishing && { furnishing: currentFilters.furnishing }),
                 ...(currentFilters.tenantPreference && { tenantPreference: currentFilters.tenantPreference }),
             });
-            const res = await fetch(`/api/properties?${params}`);
+            const res = await fetch(`/api/properties?${params}`, { signal: controller.signal });
             const data = await res.json();
 
             if (!res.ok) {
                 console.error('API Error:', data.error);
-                if (data.error && data.error.includes('IP that isn\'t whitelisted')) {
-                    // Only alert once to avoid spamming
-                    if (!window.sessionStorage.getItem('db_error_shown')) {
-                        alert('Database Connection Error: Your IP is not whitelisted in MongoDB Atlas. Please check your Atlas security settings.');
-                        window.sessionStorage.setItem('db_error_shown', 'true');
-                    }
-                }
                 return;
             }
 
             if (data.properties) {
-                setProperties(data.properties);
+                // Sort properties: Featured first
+                const sorted = data.properties.sort((a: any, b: any) => {
+                    if (a.isFeatured === b.isFeatured) return 0;
+                    return a.isFeatured ? -1 : 1;
+                });
+                setProperties(sorted);
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.name === 'AbortError') return;
             console.error('Failed to fetch properties', error);
         } finally {
             setLoading(false);
         }
     }, [filters]);
 
+
+    // Auto-Location on Mount
+    useEffect(() => {
+        // We always check on mount/refresh
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setMapCenter([latitude, longitude]);
+                    // Save as last known
+                    localStorage.setItem('user_last_location', JSON.stringify({ lat: latitude, lng: longitude }));
+                },
+                (error) => {
+                    console.log("Location access denied or error:", error);
+                    // Fallback to saved location
+                    const saved = localStorage.getItem('user_last_location');
+                    if (saved) {
+                        try {
+                            const { lat, lng } = JSON.parse(saved);
+                            if (lat && lng) setMapCenter([lat, lng]);
+                        } catch (e) {
+                            console.error("Error parsing saved location", e);
+                        }
+                    }
+                }
+            );
+        } else {
+            // Fallback if no geo API
+            const saved = localStorage.getItem('user_last_location');
+            if (saved) {
+                try {
+                    const { lat, lng } = JSON.parse(saved);
+                    if (lat && lng) setMapCenter([lat, lng]);
+                } catch (e) { console.error(e); }
+            }
+        }
+    }, []);
+
     const onBoundsChange = useCallback((bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }) => {
         setCurrentBounds(bounds);
+
+        // Save center as last known location
+        const centerLat = (bounds.minLat + bounds.maxLat) / 2;
+        const centerLng = (bounds.minLng + bounds.maxLng) / 2;
+        localStorage.setItem('user_last_location', JSON.stringify({ lat: centerLat, lng: centerLng }));
+
         if (searchAsIMove) {
             fetchProperties(bounds);
             setShowSearchButton(false);
@@ -166,6 +235,18 @@ export default function PropertySearch() {
 
     const handleFilterChange = useCallback((newFilters: FilterState) => {
         setFilters(newFilters);
+
+        // Update URL
+        const params = new URLSearchParams(window.location.search);
+        if (newFilters.type) params.set('type', newFilters.type); else params.delete('type');
+        if (newFilters.furnishing) params.set('furnishing', newFilters.furnishing); else params.delete('furnishing');
+        if (newFilters.tenantPreference) params.set('tenantPreference', newFilters.tenantPreference); else params.delete('tenantPreference');
+        params.set('minPrice', newFilters.minPrice.toString());
+        params.set('maxPrice', newFilters.maxPrice.toString());
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+
         if (currentBounds) {
             fetchProperties(currentBounds, newFilters);
         }
@@ -179,6 +260,11 @@ export default function PropertySearch() {
         }
     }, [properties]);
 
+    const handlePromote = useCallback((property: Property) => {
+        setPropertyToPromote(property);
+        setIsPromoteModalOpen(true);
+    }, []);
+
     const handleLocationSelect = useCallback((lat: number, lng: number, displayName: string) => {
         setMapCenter([lat, lng]);
     }, []);
@@ -187,12 +273,9 @@ export default function PropertySearch() {
         <div className="flex flex-col h-screen w-full bg-gray-50">
             <Navbar
                 centerContent={
-                    <div className="flex items-center gap-3 w-full max-w-4xl">
-                        <div className="flex-1 max-w-md">
+                    <div className="flex items-center gap-3 w-full">
+                        <div className="flex-1 min-w-0">
                             <LocationSearch onLocationSelect={handleLocationSelect} />
-                        </div>
-                        <div className="hidden lg:flex items-center gap-2">
-                            <FilterBar onFilterChange={handleFilterChange} />
                         </div>
                     </div>
                 }
@@ -207,8 +290,12 @@ export default function PropertySearch() {
                         highlightedId={highlightedId || undefined}
                         onMarkerClick={handleMarkerClick}
                         flyToLocation={mapCenter}
+                        onPromote={handlePromote}
                     />
                 </div>
+
+                {/* Action Sidebar - Left Side */}
+                <ActionSidebar onPostProperty={() => setIsPostModalOpen(true)} />
 
                 {/* Search Area Controls - Top Center */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-2">
@@ -235,10 +322,10 @@ export default function PropertySearch() {
                     </div>
                 </div>
 
-                {/* Mobile Filters - Floating */}
-                <div className="lg:hidden absolute top-4 left-4 right-4 z-[1000]">
-                    <div className="bg-white rounded-xl shadow-lg p-3">
-                        <FilterBar onFilterChange={handleFilterChange} />
+                {/* Icon Filters - Floating Bottom Center */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
+                        <IconFilterBar onFilterChange={handleFilterChange} />
                     </div>
                 </div>
 
@@ -261,12 +348,28 @@ export default function PropertySearch() {
                     }}
                     isSaved={selectedProperty ? savedPropertyIds.has(selectedProperty._id) : false}
                     onToggleSave={() => selectedProperty && toggleSave(selectedProperty._id)}
+                    onPromote={() => selectedProperty && handlePromote(selectedProperty)}
+                />
+
+                <PromoteModal
+                    isOpen={isPromoteModalOpen}
+                    onClose={() => setIsPromoteModalOpen(false)}
+                    propertyId={propertyToPromote?._id || ''}
+                    onSuccess={() => {
+                        // Refresh properties to show updated status
+                        if (currentBounds) fetchProperties(currentBounds);
+                    }}
                 />
             </div>
 
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
+            />
+
+            <PostPropertyModal
+                isOpen={isPostModalOpen}
+                onClose={() => setIsPostModalOpen(false)}
             />
         </div>
     );

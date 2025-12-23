@@ -24,7 +24,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     const [results, setResults] = useState<NominatimResult[]>([]);
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
-    const debounceTimer = useRef<NodeJS.Timeout | undefined>();
+    const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -116,7 +116,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     };
 
     return (
-        <div ref={wrapperRef} className="relative w-full max-w-md">
+        <div ref={wrapperRef} className="relative w-full">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <Input

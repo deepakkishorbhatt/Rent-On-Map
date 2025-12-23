@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Rent On Map - Find Your Next Home",
   description: "Advanced map-based rental property search",
+  icons: {
+    icon: '/rent_on_map_assets/rent_on_map_logo.png',
+    shortcut: '/rent_on_map_assets/rent_on_map_logo.png',
+    apple: '/rent_on_map_assets/rent_on_map_logo.png',
+  },
 };
 
 export default function RootLayout({
