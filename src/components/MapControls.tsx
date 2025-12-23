@@ -46,7 +46,7 @@ export function MapControls() {
                 html: `
                     <div class="relative flex items-center justify-center">
                         <img 
-                            src="/rent_on_map_assets/real_rent-on-map-logo.png" 
+                            src="/rent_on_map_assets/official_rent-on-map.png" 
                             alt="Your location"  
                             class="w-12 h-12 object-contain select-none pointer-events-none drop-shadow-lg"
                             draggable="false"

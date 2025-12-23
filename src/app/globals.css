@@ -279,7 +279,9 @@ img {
 }
 
 /* Additional protection for logo specifically */
-img[src*="rent_on_map_logo"] {
+img[src*="official_rent-on-map"],
+img[src*="rent_on_map_assets"] {
   pointer-events: none;
   user-select: none;
+  -webkit-user-drag: none;
 }

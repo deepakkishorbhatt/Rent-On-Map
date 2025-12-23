@@ -39,7 +39,7 @@ export function Navbar({ centerContent }: NavbarProps) {
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
                         <div className="relative w-8 h-8 flex-shrink-0">
                             <Image
-                                src="/rent_on_map_assets/real_rent-on-map-logo.png"
+                                src="/rent_on_map_assets/official_rent-on-map.png"
                                 alt="Rent On Map"
                                 fill
                                 className="object-contain select-none pointer-events-none"
@@ -149,7 +149,7 @@ export function Navbar({ centerContent }: NavbarProps) {
                                 <DialogTitle className="flex flex-col items-center justify-center gap-3 py-2">
                                     <div className="relative w-12 h-12 flex-shrink-0">
                                         <Image
-                                            src="/rent_on_map_assets/real_rent-on-map-logo.png"
+                                            src="/rent_on_map_assets/official_rent-on-map.png"
                                             alt="Rent On Map"
                                             fill
                                             className="object-contain select-none pointer-events-none"

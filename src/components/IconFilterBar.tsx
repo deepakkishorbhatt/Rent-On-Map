@@ -105,7 +105,7 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                         <Building size={20} />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-48 p-2 z-[2000]" align="center" sideOffset={12}>
+                <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={type} onValueChange={handleTypeChange}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Property Type" />
@@ -164,7 +164,7 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                         <DollarSign size={20} />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-4 z-[2000]" align="center" sideOffset={8}>
+                <PopoverContent className="w-80 p-4 z-[2000]" side="top" align="center" sideOffset={12}>
                     <div className="space-y-4">
                         <h4 className="font-semibold leading-none">Price Range</h4>
                         <div className="pt-4">
@@ -198,7 +198,7 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                         <Sofa size={20} />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-48 p-2 z-[2000]" align="center" sideOffset={8}>
+                <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={furnishing} onValueChange={handleFurnishingChange}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Furnishing" />
@@ -225,7 +225,7 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                         <Users size={20} />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-48 p-2 z-[2000]" align="center" sideOffset={8}>
+                <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={tenantPreference} onValueChange={handleTenantChange}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Tenant Type" />

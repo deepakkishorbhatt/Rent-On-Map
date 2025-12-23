@@ -345,7 +345,7 @@ export default function PropertySearch() {
 
                 {/* Results Counter - Bottom Left */}
                 {session && currentBounds && (
-                    <div className="absolute bottom-40 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[1000]">
+                    <div className="absolute bottom-48 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[900]">
                         <div className="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
                             {properties.length} {properties.length === 1 ? 'property' : 'properties'} found
                         </div>

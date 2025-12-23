@@ -37,7 +37,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     <DialogTitle className="flex flex-col items-center justify-center gap-3 pb-2">
                         <div className="relative w-12 h-12">
                             <Image
-                                src="/rent_on_map_assets/real_rent-on-map-logo.png"
+                                src="/rent_on_map_assets/official_rent-on-map.png"
                                 alt="Rent On Map"
                                 fill
                                 className="object-contain"

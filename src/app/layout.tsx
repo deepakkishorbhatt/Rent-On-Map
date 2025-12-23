@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   title: "Rent On Map - Find Your Next Home",
   description: "Advanced map-based rental property search",
   icons: {
-    icon: '/rent_on_map_assets/rent-on-map-favicon.png',
-    shortcut: '/rent_on_map_assets/rent-on-map-favicon.png',
-    apple: '/rent_on_map_assets/rent-on-map-favicon.png',
+    icon: '/rent_on_map_assets/official_rent-on-map.png',
+    shortcut: '/rent_on_map_assets/official_rent-on-map.png',
+    apple: '/rent_on_map_assets/official_rent-on-map.png',
   },
 };
 
