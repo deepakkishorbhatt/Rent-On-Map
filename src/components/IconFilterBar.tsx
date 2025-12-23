@@ -107,10 +107,10 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={type} onValueChange={handleTypeChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full [&_svg]:rotate-180">
                             <SelectValue placeholder="Property Type" />
                         </SelectTrigger>
-                        <SelectContent className="z-[2100] max-h-none" position="popper">
+                        <SelectContent position="popper" side="top" className="z-[2100]" collisionPadding={10} sideOffset={-40}>
                             <SelectItem value="all">
                                 <span className="flex items-center gap-2">
                                     <span>📋</span>
@@ -200,10 +200,10 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={furnishing} onValueChange={handleFurnishingChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full [&_svg]:rotate-180">
                             <SelectValue placeholder="Furnishing" />
                         </SelectTrigger>
-                        <SelectContent className="z-[2100]">
+                        <SelectContent position="popper" side="top" className="z-[2100]" collisionPadding={10} sideOffset={-40}>
                             <SelectItem value="all">Any Furnishing</SelectItem>
                             <SelectItem value="Full">Fully Furnished</SelectItem>
                             <SelectItem value="Semi">Semi Furnished</SelectItem>
@@ -227,10 +227,10 @@ export function IconFilterBar({ onFilterChange, initialFilters }: IconFilterBarP
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2 z-[2000]" side="top" align="center" sideOffset={12}>
                     <Select value={tenantPreference} onValueChange={handleTenantChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full [&_svg]:rotate-180">
                             <SelectValue placeholder="Tenant Type" />
                         </SelectTrigger>
-                        <SelectContent className="z-[2100]">
+                        <SelectContent position="popper" side="top" className="z-[2100]" collisionPadding={10} sideOffset={-40}>
                             <SelectItem value="all">Any Tenant</SelectItem>
                             <SelectItem value="Family">Family</SelectItem>
                             <SelectItem value="Bachelors">Bachelors</SelectItem>
