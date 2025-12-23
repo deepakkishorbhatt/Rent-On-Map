@@ -21,7 +21,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const MapListing = dynamic(() => import('@/components/MapListing'), {
     ssr: false,
     loading: () => <div className="h-full w-full flex items-center justify-center bg-gray-50">Loading Map...</div>,
-});
+}) as any;
 
 interface Property {
     _id: string;
