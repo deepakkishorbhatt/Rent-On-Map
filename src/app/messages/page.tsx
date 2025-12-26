@@ -83,7 +83,7 @@ function MessagesContent() {
             <div className="flex-1 flex w-full overflow-hidden">
                 {/* Conversations List (Sidebar) */}
                 <div className={`w-full md:w-1/3 bg-white border-r overflow-hidden flex flex-col ${selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
-                    <div className="p-4 border-b">
+                    <div className="h-[60px] flex items-center px-4 border-b shrink-0">
                         <h1 className="text-xl font-bold flex items-center gap-2">
                             <MessageSquare className="text-blue-600" /> Messages
                         </h1>

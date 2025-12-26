@@ -114,7 +114,7 @@ export function ChatWindow({ conversationId, recipientName, recipientImage, onBa
             {/* Header */}
             {/* Header */}
             {recipientName && (
-                <div className="p-2 px-3 border-b flex items-center gap-3 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+                <div className="h-[60px] px-4 border-b flex items-center gap-3 bg-white/50 backdrop-blur-sm sticky top-0 z-10 shrink-0">
                     {onBack && (
                         <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden -ml-2 h-8 w-8">
                             <ArrowLeft className="h-5 w-5" />
@@ -124,7 +124,7 @@ export function ChatWindow({ conversationId, recipientName, recipientImage, onBa
                         <AvatarImage src={recipientImage} />
                         <AvatarFallback>{recipientName[0]}</AvatarFallback>
                     </Avatar>
-                    <span className="font-semibold text-sm">{recipientName}</span>
+                    <span className="font-semibold text-base">{recipientName}</span>
                 </div>
             )}
 
