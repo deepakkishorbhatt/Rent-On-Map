@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { ChatWindow } from '@/components/ChatWindow';
 import { Loader2, MessageSquare, ArrowLeft } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -27,7 +26,7 @@ interface Conversation {
     unreadCount: Record<string, number>;
 }
 
-export default function MessagesPage() {
+function MessagesContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -170,5 +169,17 @@ export default function MessagesPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+            </div>
+        }>
+            <MessagesContent />
+        </Suspense>
     );
 }
