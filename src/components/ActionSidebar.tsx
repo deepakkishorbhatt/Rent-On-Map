@@ -3,27 +3,29 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Building2, Heart } from 'lucide-react';
+import { MessageSquare, Building2, Heart } from 'lucide-react';
 
 // ...
+// ...
 interface ActionSidebarProps {
-    onPostProperty: () => void;
+    // onPostProperty prop removed as it's no longer used
 }
 
-export function ActionSidebar({ onPostProperty }: ActionSidebarProps) {
+export function ActionSidebar({ }: ActionSidebarProps) {
     const { data: session } = useSession();
 
     if (!session) return null;
 
     return (
         <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
-            <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-12 h-12 p-0"
-                onClick={onPostProperty}
-                title="Post Property"
-            >
-                <PlusCircle size={20} />
-            </Button>
+            <Link href="/messages">
+                <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-12 h-12 p-0"
+                    title="Check Messages"
+                >
+                    <MessageSquare size={20} />
+                </Button>
+            </Link>
 
             <Link href="/my-properties">
                 <Button
@@ -44,6 +46,6 @@ export function ActionSidebar({ onPostProperty }: ActionSidebarProps) {
                     <Heart size={20} className="text-gray-700" />
                 </Button>
             </Link>
-        </div >
+        </div>
     );
 }

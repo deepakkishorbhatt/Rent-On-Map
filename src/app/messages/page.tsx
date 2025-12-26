@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { ChatWindow } from '@/components/ChatWindow';
 import { Loader2, MessageSquare, ArrowLeft } from 'lucide-react';
@@ -30,6 +30,7 @@ interface Conversation {
 export default function MessagesPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -80,9 +81,9 @@ export default function MessagesPage() {
         <div className="min-h-screen bg-gray-50 flex flex-col h-screen overflow-hidden">
             <Navbar />
 
-            <div className="flex-1 flex max-w-7xl mx-auto w-full pt-4 px-4 pb-4 gap-4 overflow-hidden">
+            <div className="flex-1 flex w-full overflow-hidden">
                 {/* Conversations List (Sidebar) */}
-                <div className={`w-full md:w-1/3 bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col ${selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
+                <div className={`w-full md:w-1/3 bg-white border-r overflow-hidden flex flex-col ${selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
                     <div className="p-4 border-b">
                         <h1 className="text-xl font-bold flex items-center gap-2">
                             <MessageSquare className="text-blue-600" /> Messages
@@ -99,58 +100,61 @@ export default function MessagesPage() {
                                 onAction={() => router.push('/')}
                             />
                         ) : (
-                            conversations.map(conv => {
-                                const other = getOtherParticipant(conv.participants);
-                                return (
-                                    <div
-                                        key={conv._id}
-                                        onClick={() => setSelectedConversationId(conv._id)}
-                                        className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversationId === conv._id ? 'bg-blue-50' : ''}`}
-                                    >
-                                        <div className="flex gap-3">
-                                            <Avatar className="h-10 w-10">
-                                                <AvatarImage src={other.image} />
-                                                <AvatarFallback>{other.name[0]}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start">
-                                                    <h3 className="font-semibold text-sm truncate">{other.name}</h3>
-                                                    {conv.lastMessageAt && (
-                                                        <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                                                            {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
-                                                        </span>
-                                                    )}
+                            conversations
+                                .filter(conv => {
+                                    const query = searchParams.get('q')?.toLowerCase() || '';
+                                    if (!query) return true;
+                                    const other = getOtherParticipant(conv.participants);
+                                    return other.name.toLowerCase().includes(query) ||
+                                        (conv.lastMessage?.toLowerCase().includes(query)) ||
+                                        (conv.propertyId?.title?.toLowerCase().includes(query));
+                                })
+                                .map(conv => {
+                                    const other = getOtherParticipant(conv.participants);
+                                    return (
+                                        <div
+                                            key={conv._id}
+                                            onClick={() => setSelectedConversationId(conv._id)}
+                                            className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversationId === conv._id ? 'bg-blue-50' : ''}`}
+                                        >
+                                            <div className="flex gap-3">
+                                                <Avatar className="h-10 w-10">
+                                                    <AvatarImage src={other.image} />
+                                                    <AvatarFallback>{other.name[0]}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-start">
+                                                        <h3 className="font-semibold text-sm truncate">{other.name}</h3>
+                                                        {conv.lastMessageAt && (
+                                                            <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
+                                                                {formatDistanceToNow(new Date(conv.lastMessageAt), { addSuffix: true })}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 truncate mb-1">
+                                                        {conv.propertyId?.title || 'Unknown Property'}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600 truncate">
+                                                        {conv.lastMessage || 'Start the conversation'}
+                                                    </p>
                                                 </div>
-                                                <p className="text-xs text-gray-500 truncate mb-1">
-                                                    {conv.propertyId?.title || 'Unknown Property'}
-                                                </p>
-                                                <p className="text-sm text-gray-600 truncate">
-                                                    {conv.lastMessage || 'Start the conversation'}
-                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })
                         )}
                     </div>
                 </div>
 
                 {/* Chat Window (Main) */}
-                <div className={`flex-1 bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col ${!selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
+                <div className={`flex-1 bg-white overflow-hidden flex flex-col ${!selectedConversationId ? 'hidden md:flex' : 'flex'}`}>
                     {selectedConversationId ? (
                         <>
-                            {/* Mobile Header to go back */}
-                            <div className="md:hidden p-3 border-b flex items-center gap-2 bg-gray-50">
-                                <button onClick={() => setSelectedConversationId(null)} className="p-1">
-                                    <ArrowLeft size={20} />
-                                </button>
-                                <span className="font-semibold">{getOtherParticipant(selectedConversation!.participants).name}</span>
-                            </div>
-
                             <ChatWindow
                                 conversationId={selectedConversationId}
                                 recipientName={getOtherParticipant(selectedConversation!.participants).name}
+                                recipientImage={getOtherParticipant(selectedConversation!.participants).image}
+                                onBack={() => setSelectedConversationId(null)}
                             />
                         </>
                     ) : (

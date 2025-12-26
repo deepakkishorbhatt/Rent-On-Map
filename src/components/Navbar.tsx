@@ -4,13 +4,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Map, PlusCircle, Heart, LogOut, Menu, User, MessageSquare } from 'lucide-react';
+import { Building2, PlusCircle, Heart, LogOut, Menu, User, MessageSquare } from 'lucide-react';
 import { ReactNode } from 'react';
 import { LoginModal } from '@/components/LoginModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { PostPropertyModal } from '@/components/PostPropertyModal';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface NavbarProps {
     centerContent?: ReactNode;
@@ -21,6 +25,26 @@ export function Navbar({ centerContent }: NavbarProps) {
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const { replace } = useRouter();
+
+    const handleSearch = useDebouncedCallback((term: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (term) {
+            params.set('q', term);
+        } else {
+            params.delete('q');
+        }
+        replace(`${pathname}?${params.toString()}`);
+    }, 300);
+
+    const getPlaceholder = () => {
+        if (pathname === '/messages') return 'Search messages';
+        if (pathname === '/my-properties') return 'Search properties';
+        if (pathname === '/saved') return 'Search saved properties';
+        return 'Search';
+    };
 
     const handlePostProperty = () => {
         if (!session) {
@@ -53,8 +77,19 @@ export function Navbar({ centerContent }: NavbarProps) {
                 </div>
 
                 {/* Center Content - Search (Visible on all sizes, but adapted by parent) */}
-                <div className="flex-1 flex justify-center min-w-0 max-w-2xl mx-2">
-                    {centerContent}
+                {/* Center Content - Search (Visible on all sizes, but adapted by parent) */}
+                <div className="flex-1 flex justify-center min-w-0 max-w-xl mx-2">
+                    {centerContent ? centerContent : (
+                        <div className="relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <Input
+                                placeholder={getPlaceholder()}
+                                className="pl-10 rounded-full shadow-md bg-white border-gray-200 focus:ring-2 focus:ring-blue-500 transition-all h-11"
+                                onChange={(e) => handleSearch(e.target.value)}
+                                defaultValue={searchParams.get('q')?.toString()}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Desktop Actions - Only show avatar dropdown */}
@@ -82,6 +117,23 @@ export function Navbar({ centerContent }: NavbarProps) {
                                     </div>
 
                                     <Button
+                                        className="w-full justify-start gap-2 rounded-none h-12 bg-black text-white hover:bg-black/90"
+                                        onClick={handlePostProperty}
+                                    >
+                                        <PlusCircle size={16} /> Post Property
+                                    </Button>
+
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start gap-2 rounded-none h-12"
+                                        asChild
+                                    >
+                                        <Link href="/profile">
+                                            <User size={16} /> My Profile
+                                        </Link>
+                                    </Button>
+
+                                    <Button
                                         variant="ghost"
                                         className="w-full justify-start gap-2 rounded-none h-12"
                                         asChild
@@ -90,13 +142,24 @@ export function Navbar({ centerContent }: NavbarProps) {
                                             <MessageSquare size={16} /> Messages
                                         </Link>
                                     </Button>
+
                                     <Button
                                         variant="ghost"
                                         className="w-full justify-start gap-2 rounded-none h-12"
                                         asChild
                                     >
-                                        <Link href="/profile">
-                                            <User size={16} /> My Profile
+                                        <Link href="/my-properties">
+                                            <Building2 size={16} /> My Properties
+                                        </Link>
+                                    </Button>
+
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start gap-2 rounded-none h-12"
+                                        asChild
+                                    >
+                                        <Link href="/saved">
+                                            <Heart size={16} /> Saved Properties
                                         </Link>
                                     </Button>
 
@@ -191,6 +254,16 @@ export function Navbar({ centerContent }: NavbarProps) {
                                                 </Link>
                                             </Button>
 
+                                            <Button
+                                                variant="ghost"
+                                                className="w-full justify-start gap-2"
+                                                asChild
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                            >
+                                                <Link href="/messages">
+                                                    <MessageSquare size={18} /> Messages
+                                                </Link>
+                                            </Button>
 
                                             <Button
                                                 variant="ghost"
@@ -199,7 +272,7 @@ export function Navbar({ centerContent }: NavbarProps) {
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                             >
                                                 <Link href="/my-properties">
-                                                    <Map size={18} /> My Properties
+                                                    <Building2 size={18} /> My Properties
                                                 </Link>
                                             </Button>
 

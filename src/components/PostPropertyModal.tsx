@@ -286,7 +286,7 @@ export function PostPropertyModal({ isOpen, onClose, initialData, propertyId }: 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0">
+            <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0 overflow-hidden sm:rounded-2xl">
                 <DialogHeader className="px-6 py-4 border-b">
                     <DialogTitle>{propertyId ? 'Edit Property' : 'Post a Property'}</DialogTitle>
                 </DialogHeader>

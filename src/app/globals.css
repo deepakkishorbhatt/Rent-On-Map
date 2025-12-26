@@ -285,3 +285,21 @@ img[src*="rent_on_map_assets"] {
   user-select: none;
   -webkit-user-drag: none;
 }
+
+/* Force horizontal centering for filter popups */
+/* Target the Radix Popover wrapper that contains centered content */
+[data-radix-popper-content-wrapper]:has([data-centered="true"]) {
+  position: fixed !important;
+  left: 50% !important;
+  top: auto !important;
+  bottom: 10rem !important;
+  transform: translateX(-50%) !important;
+  /* Override Radix's inline transform */
+  will-change: transform !important;
+}
+
+@media (min-width: 768px) {
+  [data-radix-popper-content-wrapper]:has([data-centered="true"]) {
+    bottom: 6rem !important;
+  }
+}

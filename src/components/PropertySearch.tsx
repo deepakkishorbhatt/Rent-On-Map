@@ -305,7 +305,7 @@ export default function PropertySearch() {
                 </div>
 
                 {/* Action Sidebar - Left Side */}
-                <ActionSidebar onPostProperty={() => setIsPostModalOpen(true)} />
+                <ActionSidebar />
 
                 {/* Search Area Controls - Top Center */}
                 {session && (
@@ -335,7 +335,7 @@ export default function PropertySearch() {
                 )}
 
                 {/* Icon Filters - Floating Bottom Center */}
-                {session && !isPostModalOpen && (
+                {session && (
                     <div className="absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
                         <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
                             <IconFilterBar onFilterChange={handleFilterChange} />
@@ -344,7 +344,7 @@ export default function PropertySearch() {
                 )}
 
                 {/* Results Counter - Bottom Left */}
-                {session && currentBounds && !isPostModalOpen && (
+                {session && currentBounds && (
                     <div className="absolute bottom-48 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[900]">
                         <div className="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
                             {properties.length} {properties.length === 1 ? 'property' : 'properties'} found

@@ -125,7 +125,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => results.length > 0 && setShowResults(true)}
-                    className="pl-10 pr-10 h-11 bg-white shadow-md border-gray-200 focus:ring-2 focus:ring-blue-500"
+                    className="pl-10 pr-10 h-11 bg-white shadow-md border-gray-200 focus:ring-2 focus:ring-blue-500 rounded-full"
                 />
                 {loading && (
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 animate-spin" size={18} />
