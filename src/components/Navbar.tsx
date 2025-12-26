@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,7 +20,7 @@ interface NavbarProps {
     centerContent?: ReactNode;
 }
 
-export function Navbar({ centerContent }: NavbarProps) {
+function NavbarContent({ centerContent }: NavbarProps) {
     const { data: session } = useSession();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isPostModalOpen, setIsPostModalOpen] = useState(false);
@@ -76,7 +76,6 @@ export function Navbar({ centerContent }: NavbarProps) {
                     </Link>
                 </div>
 
-                {/* Center Content - Search (Visible on all sizes, but adapted by parent) */}
                 {/* Center Content - Search (Visible on all sizes, but adapted by parent) */}
                 <div className="flex-1 flex justify-center min-w-0 max-w-xl mx-2">
                     {centerContent ? centerContent : (
@@ -325,5 +324,13 @@ export function Navbar({ centerContent }: NavbarProps) {
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
             <PostPropertyModal isOpen={isPostModalOpen} onClose={() => setIsPostModalOpen(false)} />
         </nav >
+    );
+}
+
+export function Navbar(props: NavbarProps) {
+    return (
+        <Suspense fallback={<div className="h-16 border-b bg-white" />}>
+            <NavbarContent {...props} />
+        </Suspense>
     );
 }
