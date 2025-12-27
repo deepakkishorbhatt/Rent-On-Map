@@ -126,8 +126,8 @@ export default function PropertySearch() {
     }, [session, savedPropertyIds]);
 
 
-    const fetchProperties = useCallback(async (bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }, currentFilters = filters) => {
-        // Cancel previous request if exists
+    const fetchProperties = useCallback(async (bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }, currentFilters = filters, isBackground = false) => {
+        // Cancel previous request if exists (only if not background, or handle carefully? AbortController might abort the previous background one too which is fine)
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
@@ -135,7 +135,7 @@ export default function PropertySearch() {
         const controller = new AbortController();
         abortControllerRef.current = controller;
 
-        setLoading(true);
+        if (!isBackground) setLoading(true);
         try {
             const params = new URLSearchParams({
                 minLat: bounds.minLat.toString(),
@@ -162,61 +162,55 @@ export default function PropertySearch() {
                     if (a.isFeatured === b.isFeatured) return 0;
                     return a.isFeatured ? -1 : 1;
                 });
+
+                // Only update state if data changed? 
+                // For simplicity, just update. React diffing handles unique keys efficiently.
+                // But deep comparison might be better to avoid re-renders of markers?
+                // Markers usually re-render cheap.
                 setProperties(sorted);
             }
         } catch (error: any) {
             if (error.name === 'AbortError') return;
             console.error('Failed to fetch properties', error);
         } finally {
-            setLoading(false);
+            if (!isBackground) setLoading(false);
         }
     }, [filters]);
+
+    // Polling for Real-time updates
+    useEffect(() => {
+        if (!currentBounds || !searchAsIMove) return;
+
+        const intervalId = setInterval(() => {
+            fetchProperties(currentBounds, filters, true); // Background fetch
+        }, 4000); // Poll every 4 seconds
+
+        return () => clearInterval(intervalId);
+    }, [currentBounds, filters, searchAsIMove, fetchProperties]);
 
 
     // Auto-Location on Mount
     useEffect(() => {
-        // We always check on mount/refresh
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
                     setMapCenter([latitude, longitude]);
-                    // Save as last known
-                    localStorage.setItem('user_last_location', JSON.stringify({ lat: latitude, lng: longitude }));
                 },
                 (error) => {
                     console.log("Location access denied or error:", error);
-                    // Fallback to saved location
-                    const saved = localStorage.getItem('user_last_location');
-                    if (saved) {
-                        try {
-                            const { lat, lng } = JSON.parse(saved);
-                            if (lat && lng) setMapCenter([lat, lng]);
-                        } catch (e) {
-                            console.error("Error parsing saved location", e);
-                        }
-                    }
                 }
             );
-        } else {
-            // Fallback if no geo API
-            const saved = localStorage.getItem('user_last_location');
-            if (saved) {
-                try {
-                    const { lat, lng } = JSON.parse(saved);
-                    if (lat && lng) setMapCenter([lat, lng]);
-                } catch (e) { console.error(e); }
-            }
         }
     }, []);
 
     const onBoundsChange = useCallback((bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number }) => {
         setCurrentBounds(bounds);
 
-        // Save center as last known location
-        const centerLat = (bounds.minLat + bounds.maxLat) / 2;
-        const centerLng = (bounds.minLng + bounds.maxLng) / 2;
-        localStorage.setItem('user_last_location', JSON.stringify({ lat: centerLat, lng: centerLng }));
+        // Save center as last known location - REMOVED per user request
+        // const centerLat = (bounds.minLat + bounds.maxLat) / 2;
+        // const centerLng = (bounds.minLng + bounds.maxLng) / 2;
+        // localStorage.setItem('user_last_location', JSON.stringify({ lat: centerLat, lng: centerLng }));
 
         if (searchAsIMove) {
             fetchProperties(bounds);
@@ -280,7 +274,7 @@ export default function PropertySearch() {
     }, []);
 
     return (
-        <div className="flex flex-col h-screen w-full bg-gray-50">
+        <div className="flex flex-col h-full w-full bg-gray-50">
             <Navbar
                 centerContent={
                     <div className="flex items-center gap-3 w-full">
@@ -308,34 +302,32 @@ export default function PropertySearch() {
                 <ActionSidebar />
 
                 {/* Search Area Controls - Top Center */}
-                {session && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-                        {showSearchButton && (
-                            <Button
-                                className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg gap-2 rounded-full px-6 transition-all animate-in fade-in slide-in-from-top-4"
-                                onClick={handleSearchAreaClick}
-                            >
-                                <Search size={16} />
-                                Search this area
-                            </Button>
-                        )}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+                    {showSearchButton && (
+                        <Button
+                            className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg gap-2 rounded-full px-6 transition-all animate-in fade-in slide-in-from-top-4"
+                            onClick={handleSearchAreaClick}
+                        >
+                            <Search size={16} />
+                            Search this area
+                        </Button>
+                    )}
 
-                        <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border flex items-center gap-2">
-                            <Checkbox
-                                id="search-move"
-                                checked={searchAsIMove}
-                                onCheckedChange={(checked) => setSearchAsIMove(checked as boolean)}
-                                className="data-[state=checked]:bg-blue-600"
-                            />
-                            <Label htmlFor="search-move" className="text-xs font-medium cursor-pointer text-gray-700">
-                                Search as I move
-                            </Label>
-                        </div>
+                    <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border flex items-center gap-2">
+                        <Checkbox
+                            id="search-move"
+                            checked={searchAsIMove}
+                            onCheckedChange={(checked) => setSearchAsIMove(checked as boolean)}
+                            className="data-[state=checked]:bg-blue-600"
+                        />
+                        <Label htmlFor="search-move" className="text-xs font-medium cursor-pointer text-gray-700">
+                            Search as I move
+                        </Label>
                     </div>
-                )}
+                </div>
 
                 {/* Icon Filters - Floating Bottom Center */}
-                {session && (
+                {!selectedProperty && (
                     <div className="absolute bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[1000]">
                         <div className="bg-white/90 backdrop-blur-sm rounded-full shadow-xl p-2">
                             <IconFilterBar onFilterChange={handleFilterChange} />
@@ -344,7 +336,7 @@ export default function PropertySearch() {
                 )}
 
                 {/* Results Counter - Bottom Left */}
-                {session && currentBounds && (
+                {!selectedProperty && currentBounds && (
                     <div className="absolute bottom-48 left-1/2 -translate-x-1/2 md:bottom-6 md:left-6 md:translate-x-0 z-[900]">
                         <div className="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium">
                             {properties.length} {properties.length === 1 ? 'property' : 'properties'} found

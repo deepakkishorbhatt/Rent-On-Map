@@ -52,7 +52,16 @@ export async function GET(req: Request) {
 
         await connectDB();
         // Populate saved properties
-        const user = await User.findOne({ email: session.user.email }).populate('savedProperties');
+        // Populate saved properties and their owners
+        const user = await User.findOne({ email: session.user.email })
+            .populate({
+                path: 'savedProperties',
+                populate: {
+                    path: 'ownerId',
+                    model: 'User',
+                    select: 'name email image isVerified'
+                }
+            });
 
         return NextResponse.json({ savedProperties: user?.savedProperties || [] });
     } catch (error) {

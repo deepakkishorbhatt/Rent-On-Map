@@ -97,7 +97,7 @@ function NavbarContent({ centerContent }: NavbarProps) {
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Avatar className="h-8 w-8 cursor-pointer border ring-offset-2 hover:ring-2 transition-all">
-                                    <AvatarImage src={session.user?.image || "https://github.com/shadcn.png"} alt="@user" />
+                                    <AvatarImage src={session.user?.image || "https://github.com/shadcn.png"} alt="@user" referrerPolicy="no-referrer" />
                                     <AvatarFallback>{session.user?.name?.[0] || 'U'}</AvatarFallback>
                                 </Avatar>
                             </PopoverTrigger>
@@ -106,7 +106,7 @@ function NavbarContent({ centerContent }: NavbarProps) {
                                     {/* User Info */}
                                     <div className="flex items-center gap-3 p-4">
                                         <Avatar className="h-10 w-10 border">
-                                            <AvatarImage src={session.user?.image || ""} />
+                                            <AvatarImage src={session.user?.image || ""} referrerPolicy="no-referrer" />
                                             <AvatarFallback>{session.user?.name?.[0] || 'U'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col flex-1 min-w-0">

@@ -12,11 +12,16 @@ import { EmptyState } from '@/components/EmptyState';
 import { Heart } from 'lucide-react';
 import { PropertyCardSkeleton } from '@/components/PropertyCardSkeleton';
 
+import { PropertyDetails } from '@/components/PropertyDetails';
+
 export default function SavedPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [savedProperties, setSavedProperties] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Detail Modal State
+    const [detailProperty, setDetailProperty] = useState<any | null>(null);
 
     // Comparison State
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -29,7 +34,9 @@ export default function SavedPage() {
     }, [status, router]);
 
     useEffect(() => {
-        if (session?.user) {
+        if (!session?.user) return;
+
+        const fetchSaved = () => {
             fetch('/api/user/saved')
                 .then(res => res.json())
                 .then(data => {
@@ -39,7 +46,15 @@ export default function SavedPage() {
                 })
                 .catch(err => console.error(err))
                 .finally(() => setLoading(false));
-        }
+        };
+
+        // Initial fetch
+        fetchSaved();
+
+        // Poll every 1 second for "instant" updates
+        const intervalId = setInterval(fetchSaved, 1000);
+
+        return () => clearInterval(intervalId);
     }, [session, status]);
 
     const handleToggleSave = async (id: string) => {
@@ -136,6 +151,7 @@ export default function SavedPage() {
                                 onToggleSave={() => handleToggleSave(property._id)}
                                 selected={selectedIds.has(property._id)}
                                 onSelect={() => toggleSelection(property._id)}
+                                onClick={() => setDetailProperty(property)}
                             />
                         ))}
                     </div>
@@ -170,6 +186,14 @@ export default function SavedPage() {
                 isOpen={isCompareOpen}
                 onClose={() => setIsCompareOpen(false)}
                 properties={savedProperties.filter(p => selectedIds.has(p._id))}
+            />
+
+            <PropertyDetails
+                property={detailProperty}
+                isOpen={!!detailProperty}
+                onClose={() => setDetailProperty(null)}
+                isSaved={detailProperty ? true : false} // Already in saved page, so isSaved is explicitly true unless we want to allow unsaving from details?
+                onToggleSave={() => detailProperty && handleToggleSave(detailProperty._id)}
             />
         </div>
     );

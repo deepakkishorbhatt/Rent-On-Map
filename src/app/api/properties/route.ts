@@ -40,7 +40,8 @@ export async function GET(request: Request) {
             price: {
                 $gte: parseFloat(searchParams.get('minPrice') || '0'),
                 $lte: parseFloat(searchParams.get('maxPrice') || '10000000')
-            }
+            },
+            isVisible: { $ne: false } // Only show visible properties (handles undefined as true)
         };
 
         if (searchParams.get('type')) {
@@ -124,6 +125,9 @@ export async function POST(request: Request) {
             bathrooms: body.bathrooms,
             area: body.area,
             contactNumber: body.contactNumber,
+            address: body.address,
+            pincode: body.pincode,
+            city: body.city,
             location: {
                 type: 'Point',
                 coordinates: [lng, lat] // GeoJSON is [lng, lat]

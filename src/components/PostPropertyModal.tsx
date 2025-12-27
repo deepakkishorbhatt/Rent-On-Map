@@ -220,6 +220,12 @@ export function PostPropertyModal({ isOpen, onClose, initialData, propertyId }: 
                 lng: initialData.location?.coordinates[0] || 0,
                 images: initialData.images || []
             });
+
+            // Populate selected rooms if available
+            if (initialData.rooms) {
+                setSelectedRooms(initialData.rooms);
+            }
+
             if (initialData.location) {
                 setMapViewTrigger({
                     lat: initialData.location.coordinates[1],

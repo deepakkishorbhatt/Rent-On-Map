@@ -12,6 +12,8 @@ import { Navbar } from '@/components/Navbar';
 import { EmptyState } from '@/components/EmptyState';
 import { PropertyCardSkeleton } from '@/components/PropertyCardSkeleton';
 
+import { PropertyDetails } from '@/components/PropertyDetails';
+
 export default function MyPropertiesPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -21,6 +23,9 @@ export default function MyPropertiesPage() {
     // Edit Modal State
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState<any | null>(null);
+
+    // Details Modal State
+    const [detailProperty, setDetailProperty] = useState<any | null>(null);
 
     // Promote Modal State
     const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
@@ -145,7 +150,7 @@ export default function MyPropertiesPage() {
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 onPromote={() => handlePromote(property)}
-                                onClick={() => { }}
+                                onClick={() => setDetailProperty(property)}
                             />
                         ))}
                     </div>
@@ -162,6 +167,12 @@ export default function MyPropertiesPage() {
                     isOpen={isPromoteModalOpen}
                     onClose={handleClosePromoteModal}
                     propertyId={selectedPromotePropertyId || ''}
+                />
+
+                <PropertyDetails
+                    property={detailProperty}
+                    isOpen={!!detailProperty}
+                    onClose={() => setDetailProperty(null)}
                 />
             </div>
         </>

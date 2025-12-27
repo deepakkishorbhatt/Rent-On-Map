@@ -78,7 +78,7 @@ export default function ProfilePage() {
                 <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border p-8">
                     <div className="flex flex-col items-center">
                         <Avatar className="h-24 w-24 mb-4">
-                            <AvatarImage src={user?.image || session.user?.image || ''} />
+                            <AvatarImage src={user?.image || session.user?.image || ''} referrerPolicy="no-referrer" />
                             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
 

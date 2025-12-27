@@ -38,7 +38,7 @@ export async function GET(request: Request) {
                 { ownerId: user._id },
                 { ownerId: user._id.toString() }
             ]
-        }).sort({ createdAt: -1 });
+        }).sort({ createdAt: -1 }).populate('ownerId');
 
         console.log('Found properties:', properties.length);
 

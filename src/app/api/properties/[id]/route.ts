@@ -53,6 +53,26 @@ export async function PUT(
         property.features = body.features || property.features;
         property.images = finalImages;
 
+        // Structured Details
+        property.contactNumber = body.contactNumber || property.contactNumber;
+        property.bedrooms = body.bedrooms;
+        property.bathrooms = body.bathrooms;
+        property.area = body.area;
+        if (body.rooms) {
+            property.rooms = body.rooms;
+        }
+
+        // Address info
+        property.address = body.address || property.address;
+        property.pincode = body.pincode || property.pincode;
+        property.pincode = body.pincode || property.pincode;
+        property.city = body.city || property.city;
+
+        // Visibility toggle
+        if (typeof body.isVisible === 'boolean') {
+            property.isVisible = body.isVisible;
+        }
+
         if (body.lat && body.lng) {
             property.location = {
                 type: 'Point',

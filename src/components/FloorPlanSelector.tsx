@@ -18,9 +18,10 @@ interface RoomSelection {
 interface FloorPlanSelectorProps {
     selectedRooms: RoomSelection;
     onRoomSelect: (roomType: keyof RoomSelection, action: 'add' | 'remove' | 'toggle') => void;
+    readOnly?: boolean;
 }
 
-export function FloorPlanSelector({ selectedRooms, onRoomSelect }: FloorPlanSelectorProps) {
+export function FloorPlanSelector({ selectedRooms, onRoomSelect, readOnly = false }: FloorPlanSelectorProps) {
     const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
     const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
     const [clickCount, setClickCount] = useState(0);
@@ -37,6 +38,7 @@ export function FloorPlanSelector({ selectedRooms, onRoomSelect }: FloorPlanSele
     ];
 
     const handleGradientClick = (e: React.MouseEvent<HTMLDivElement>, roomId: string, countable: boolean, max?: number) => {
+        if (readOnly) return;
         const key = roomId as keyof RoomSelection;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -76,17 +78,28 @@ export function FloorPlanSelector({ selectedRooms, onRoomSelect }: FloorPlanSele
         return selectedRooms[key];
     };
 
+    const visibleRooms = readOnly
+        ? rooms.filter(room => {
+            const value = getRoomValue(room.id);
+            return room.countable ? (value as number) > 0 : value === true;
+        })
+        : rooms;
+
+    if (readOnly && visibleRooms.length === 0) return null;
+
     return (
         <div className="space-y-4">
-            <div className="text-center space-y-2">
-                <h3 className="text-lg font-semibold">Select Rooms</h3>
-                <p className="text-sm text-muted-foreground">
-                    Tap Left (Red) to Remove • Tap Right (Green) to Add
-                </p>
-            </div>
+            {!readOnly && (
+                <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold">Select Rooms</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Tap Left (Red) to Remove • Tap Right (Green) to Add
+                    </p>
+                </div>
+            )}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {rooms.map((room) => {
+                {visibleRooms.map((room) => {
                     const Icon = room.icon;
                     const value = getRoomValue(room.id);
                     const count = room.countable ? (value as number) : (value ? 1 : 0);
@@ -96,20 +109,18 @@ export function FloorPlanSelector({ selectedRooms, onRoomSelect }: FloorPlanSele
                         <div
                             key={room.id}
                             className={`
-                                relative h-24 rounded-xl border-2 cursor-pointer transition-all duration-200 overflow-hidden select-none
+                                relative h-24 rounded-xl border-2 transition-all duration-200 overflow-hidden select-none
+                                ${!readOnly ? 'cursor-pointer active:scale-95' : ''}
                                 ${isSelected ? 'border-gray-300 shadow-md transform scale-105' : 'border-gray-200 hover:border-gray-300'}
-                                active:scale-95
                             `}
                             onClick={(e) => handleGradientClick(e, room.id, room.countable, room.max)}
                             style={{
                                 background: isSelected
-                                    ? 'linear-gradient(90deg, #fee2e2 0%, #dcfce7 100%)' // Smooth blend for selected
-                                    : 'linear-gradient(90deg, #fff1f2 0%, #f0fdf4 100%)', // Smooth blend for unselected
-                                borderColor: isSelected ? 'transparent' : ''
+                                    ? (readOnly ? '#f0f9ff' : 'linear-gradient(90deg, #fee2e2 0%, #dcfce7 100%)')
+                                    : 'linear-gradient(90deg, #fff1f2 0%, #f0fdf4 100%)',
+                                borderColor: isSelected ? (readOnly ? '#bae6fd' : '') : '' // Let CSS handle border for interactive
                             }}
                         >
-                            {/* Hover/Selection effect overlay if needed, or keeping it clean */}
-
                             {/* Content Centered */}
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
                                 <Icon className={`w-8 h-8 mb-1 ${isSelected ? 'text-gray-700' : 'text-gray-400'}`} />
@@ -126,18 +137,18 @@ export function FloorPlanSelector({ selectedRooms, onRoomSelect }: FloorPlanSele
                                     </Badge>
                                 </div>
                             )}
-
-                            {/* Visual hints for interaction (visible on hover could be nice, but simple gradient is requested) */}
                         </div>
                     );
                 })}
             </div>
 
-            <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 text-center">
-                <span className="font-semibold text-red-500">← Red (Remove)</span>
-                <span className="mx-2">|</span>
-                <span className="font-semibold text-green-600">Green (Add) →</span>
-            </div>
+            {!readOnly && (
+                <div className="bg-gradient-to-r from-red-50 to-green-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-600 text-center">
+                    <span className="font-semibold text-red-500">← Red (Remove)</span>
+                    <span className="mx-2">|</span>
+                    <span className="font-semibold text-green-600">Green (Add) →</span>
+                </div>
+            )}
         </div>
     );
 }

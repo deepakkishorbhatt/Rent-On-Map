@@ -20,6 +20,7 @@ export interface IProperty extends Document {
 
     isVerified?: boolean;
     isFeatured?: boolean;
+    isVisible?: boolean;
     featuredExpiry?: Date;
 
     // Detailed room information (for House/Flat types)
@@ -63,6 +64,7 @@ const PropertySchema = new Schema<IProperty>(
 
         isVerified: { type: Boolean, default: false },
         isFeatured: { type: Boolean, default: false },
+        isVisible: { type: Boolean, default: true }, // Visibility toggle
         featuredExpiry: { type: Date },
 
         // Detailed room information

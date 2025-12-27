@@ -29,6 +29,11 @@ export const authOptions: NextAuthOptions = {
                                 image: user.image || '',
                                 savedProperties: []
                             });
+                        } else {
+                            // Update existing user's image and name if changed (keep DB in sync)
+                            existingUser.name = user.name || existingUser.name;
+                            existingUser.image = user.image || existingUser.image;
+                            await existingUser.save();
                         }
                     }
                     return true;
